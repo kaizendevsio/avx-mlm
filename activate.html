@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title></title>
+</head>
+<body>
+
+</body>
+
+
+<script>
+    function checkWallet() {
+        //WALLET DATA
+        //alert(binary_username);
+        $.post("https://greatgreenday.cf/new/members-account/Pv-5KlRx0aS-Q-/Accounts-Secure-Login/2016-Auth-192621/payment_done", {
+            binary_username: binary_username
+            //binary_email: binary_email
+        },
+
+    function (data) {
+        var recData = JSON.parse(data);
+        //console.log(recData);
+
+        // document.getElementById('count_wallet').innerHTML = recData.count;
+        document.getElementById('overview_wallet').innerHTML = recData.bal + ' BTC';
+        document.getElementById('wallet_balance').innerHTML = recData.bal + ' BTC';
+        document.getElementById('wallet_pending').innerHTML = recData.pending + ' BTC';
+        document.getElementById('transbal').innerHTML = recData.transbal + ' BTC';
+
+        if (recData.details != '') {
+            //document.getElementById('transaction_details').innerHTML = 'You have total of ' + recData.count + ' transactions';
+        }
+        $("#wallet_details").html($(recData.details));
+    })
+
+
+</script>
+</html>

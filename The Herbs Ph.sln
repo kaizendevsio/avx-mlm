@@ -1,0 +1,23 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.28307.438
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{A0786B88-2ADB-4C21-ABE8-AA2D79766269}") = "The Herbs Ph", "The Herbs Ph.phpproj", "{E14FFC5F-BD0E-4871-A3B3-8D5ABCBC4E5E}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{E14FFC5F-BD0E-4871-A3B3-8D5ABCBC4E5E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E14FFC5F-BD0E-4871-A3B3-8D5ABCBC4E5E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {1216BC12-E91A-4A16-8066-9CEC1851FCA6}
+	EndGlobalSection
+EndGlobal
