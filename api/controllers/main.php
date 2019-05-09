@@ -57,6 +57,7 @@ include('sub_matrix_binary_set_left.php');
 include('sub_matrix_binary_set_right.php');
 include('sub_find_by_maps_userid.php');
 include('sub_new_blockchain_payment.php');
+include('sub_get_user_wdirects.php');
 
 class controllers{
 
@@ -110,6 +111,7 @@ class controllers{
         $this->matrixSetRight = new sub_controller_matrix_set_right("1");
         $this->findByMapsUserId = new sub_controller_find_by_maps_userid("1");
         $this->newBlockchainPayment = new sub_controller_new_blockchain_payment("1");
+        $this->getUsersWithDirects = new sub_controller_get_users_wdirects("1");
 
         $controllers = $this;
     }
@@ -255,9 +257,11 @@ class controllers{
     function findByMapsUserId(){
         return $this->findByMapsUserId->providers_query();
     }
-
     function newBlockchainPayment(){
         return $this->newBlockchainPayment->providers_query();
+    }
+    function getUsersWithDirects(){
+        return $this->getUsersWithDirects->providers_query();
     }
 }
 

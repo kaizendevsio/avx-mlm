@@ -172,13 +172,7 @@ class accounts{
                 $wallet = new wallet;
 
                 //ADD DIRECT REFFERAL BONUS
-                $user_dr = 0;
-                if ($package->name == "SILVER"){
-                    $user_dr = 500;
-                }
-                else if ($package->name == "GOLD"){
-                    $user_dr = 1000;
-                }
+                $user_dr = floatval($package->value) * (.10);
 
                 $wallet->topUp($options->UplineAccountCode,($user_dr),$wallet->getWalletID('DR'),true);
                 $wallet->topUp($options->UplineAccountCode,1,$wallet->getWalletID('DR_COUNT'));
@@ -198,6 +192,14 @@ class accounts{
 
                 // EXECUTE BINARY PAIRING
                 $this->executeBinaryPairing($options);
+                $this->findById($newUserId);
+
+                // EXECUTE UNILEVEL BONUS
+                $this->executeUniLevel();
+                $this->findById($newUserId);
+
+                // EXECUTE SH BONUS
+                $this->excecuteSHbonus($newUserId);
 
                 //SEND VERIFICATION EMAIL =================================================================
                 if ($_isDebug == false)
@@ -308,6 +310,43 @@ class accounts{
             $status = '301';
             $message_txt = $controllers->findByUserName();
         }
+
+    }
+
+    function getUsersWithDirects($options){
+
+        global $controllers;
+        if ($controllers->getUsersWithDirects() == 'OK')
+        {
+            $data = [
+             'directs_count' => $options->directs_count
+             ];
+
+            $controllers->getUsersWithDirects->stmt->execute($data);
+            $result = $controllers->getUsersWithDirects->stmt->fetchAll(PDO::FETCH_OBJ);
+            $resultCount = $controllers->getUsersWithDirects->stmt->rowCount();
+
+            if ($resultCount > 0)
+            {
+                $message_txt = 'Accounts found with ' . $resultCount . ' result(s)';
+                $status = '200';
+
+                //RETURN RESULT OBJECT
+                return $result;
+
+            }
+            else
+            {
+                return 'No results returned';
+                $status = '500';
+            }
+
+        }
+        else{
+            $status = '301';
+            return $controllers->getUsersWithDirects();
+        }
+
 
     }
 
@@ -538,7 +577,7 @@ class accounts{
                 $node = new Node;
                 $node->binaryPosition = '1';
                 $node->account_code = $current_user->account_code;
-                $node->binaryCount_left = 1;
+                $node->binaryCount_left = 150;
 
                 $matrix->NodeTopUp($node);
 
@@ -548,7 +587,7 @@ class accounts{
                 $node = new Node;
                 $node->binaryPosition = '2';
                 $node->account_code = $current_user->account_code;
-                $node->binaryCount_right = 1;
+                $node->binaryCount_right = 150;
 
                 $matrix->NodeTopUp($node);
             }
@@ -576,7 +615,7 @@ class accounts{
                     $wallet->setBalance($current_user->account_code,0,$wallet->getWalletID('PAIR_COUNTER'));
                 }
                 else{
-                    $wallet->topUp($current_user->account_code,1,$wallet->getWalletID('PAIR_COUNTER'));
+                    $wallet->topUp($current_user->account_code, 150 ,$wallet->getWalletID('PAIR_COUNTER'));
                 }
 
             }
@@ -607,14 +646,16 @@ class accounts{
         global $_date;
         $wallet = new wallet;
         $products = new products;
+        $packages = new packages;
 
         $x = 0;
         $startLvl = 1;
-        $maxLvl = 6;
+        $maxLvl = 5;
         $tmpLog = '';
         $hasUpline = true;
         $initialUserId = $this->userID;
         $upline_account_code = $this->parentID;
+        $packages->getPackageName($this->account_package);
 
         //REQUIRE 2 PRODUCTS PURCHASE
 
@@ -630,44 +671,32 @@ class accounts{
 
                 if ($startLvl == 1)
                 {
-                    // ON LEVEL 1, GIVE 25 ON USER
-                    $wallet->topUp($this->userID,25,$wallet->getWalletID('UL'));
-                    $wallet->topUp($this->userID,25,$wallet->getWalletID('MAIN'));
+                    // ON LEVEL 1, GIVE 1.5% ON USER
+                    $wallet->topUp($this->userID,(floatval($packages->value) * 0.015),$wallet->getWalletID('UL'),true);
                     $tmpLog = $tmpLog . ' - UL AT LEVEL ' . $startLvl . ', EARNING: ' . 25;
                 }
                 else if ($startLvl == 2)
                 {
-                    // ON LEVEL 2, GIVE 20 ON USER
-                    $wallet->topUp($this->userID,20,$wallet->getWalletID('UL'));
-                    $wallet->topUp($this->userID,20,$wallet->getWalletID('MAIN'));
+                    // ON LEVEL 2, GIVE 1% ON USER
+                    $wallet->topUp($this->userID,(floatval($packages->value) * 0.01),$wallet->getWalletID('UL'),true);
                     $tmpLog = $tmpLog . ' - UL AT LEVEL ' . $startLvl . ', EARNING: ' . 20;
                 }
                 else if ($startLvl == 3)
                 {
-                    // ON LEVEL 3, GIVE 20 ON USER
-                    $wallet->topUp($this->userID,20,$wallet->getWalletID('UL'));
-                    $wallet->topUp($this->userID,20,$wallet->getWalletID('MAIN'));
+                    // ON LEVEL 3, GIVE 1% ON USER
+                    $wallet->topUp($this->userID,(floatval($packages->value) * 0.01),$wallet->getWalletID('UL'),true);
                     $tmpLog = $tmpLog . ' - UL AT LEVEL ' . $startLvl . ', EARNING: ' . 20;
                 }
                 else if ($startLvl == 4)
                 {
-                    // ON LEVEL 4, GIVE 20 ON USER
-                    $wallet->topUp($this->userID,20,$wallet->getWalletID('UL'));
-                    $wallet->topUp($this->userID,20,$wallet->getWalletID('MAIN'));
+                    // ON LEVEL 4, GIVE 0.05% ON USER
+                    $wallet->topUp($this->userID,(floatval($packages->value) * 0.005),$wallet->getWalletID('UL'),true);
                     $tmpLog = $tmpLog . ' - UL AT LEVEL ' . $startLvl . ', EARNING: ' . 20;
                 }
                 else if ($startLvl == 5)
                 {
-                    // ON LEVEL 5, GIVE 20 ON USER
-                    $wallet->topUp($this->userID,20,$wallet->getWalletID('UL'));
-                    $wallet->topUp($this->userID,20,$wallet->getWalletID('MAIN'));
-                    $tmpLog = $tmpLog . ' - UL AT LEVEL ' . $startLvl . ', EARNING: ' . 20;
-                }
-                else if ($startLvl == 6)
-                {
-                    // ON LEVEL 6, GIVE 20 ON USER
-                    $wallet->topUp($this->userID,20,$wallet->getWalletID('UL'));
-                    $wallet->topUp($this->userID,20,$wallet->getWalletID('MAIN'));
+                    // ON LEVEL 5, GIVE 0.05% ON USER
+                    $wallet->topUp($this->userID,(floatval($packages->value) * 0.005),$wallet->getWalletID('UL'),true);
                     $tmpLog = $tmpLog . ' - UL AT LEVEL ' . $startLvl . ', EARNING: ' . 20;
                 }
 
@@ -707,77 +736,82 @@ class accounts{
         $Pearnings = [500,1500,2500,5000,7000,10000,15000,40000,50000,100000,200000,250000,400000,500000,1000000,2000000,3000000,5000000,10000000,15000000,20000000,25000000,150000000];
         $i = $level;
 
-            $startEntry_count = 2;
-        	$required_users_counter = $wallet->getWalletBalance("ADMIN",$wallet->getWalletID('ADMIN_BP_' . $i));
+        $startEntry_count = 2;
+        $required_users_counter = $wallet->getWalletBalance("ADMIN",$wallet->getWalletID('ADMIN_BP_' . $i));
 
-            for ($c = 0; $c < $required_users_counter; $c++)
+        for ($c = 0; $c < $required_users_counter; $c++)
+        {
+            //$startEntry_count++;
+        }
+
+        // CHECK IF NO OF REQURED USER HAS BEEN MET
+        $BP_USERS_COUNT = $wallet->getWalletBalance("ADMIN",$wallet->getWalletID('ADMIN_BP_USER_COUNT_' . $i));
+        $BP_CURRENT_USER = $wallet->getWalletBalance("ADMIN",$wallet->getWalletID('ADMIN_BP_' . $i));
+        $BP_CURRENT_USER_LEVEL = $wallet->getWalletBalance($allAccounts[$BP_CURRENT_USER]->account_code,$wallet->getWalletID('BP_COUNTER'));
+
+        if ($BP_USERS_COUNT == $startEntry_count)
+        {
+            //CHECK PACKAGE
+            if ($allAccounts[$BP_CURRENT_USER]->account_package >= $package->getPackageID('BASIC'))
             {
-            	//$startEntry_count++;
+                // CHECK USER BP LEVEL
+
+                if ($level < 23)
+                {
+                    $earning = $Bearnings[$i];
+                    $wallet->topUp($allAccounts[$BP_CURRENT_USER]->account_code,$earning,$wallet->getWalletID('BP'));
+                    $this->executeBonusPool(($BP_CURRENT_USER_LEVEL + 1));
+
+                    $wallet->topUp("ADMIN", 1, $wallet->getWalletID('ADMIN_BP_' . $i));
+                    $wallet->topUp($allAccounts[$BP_CURRENT_USER]->account_code, 1, $wallet->getWalletID('BP_COUNTER'));
+                    $wallet->setBalance("ADMIN",'0',$wallet->getWalletID('ADMIN_BP_USER_COUNT_'. $i));
+                }
             }
 
-            // CHECK IF NO OF REQURED USER HAS BEEN MET
-            $BP_USERS_COUNT = $wallet->getWalletBalance("ADMIN",$wallet->getWalletID('ADMIN_BP_USER_COUNT_' . $i));
-            $BP_CURRENT_USER = $wallet->getWalletBalance("ADMIN",$wallet->getWalletID('ADMIN_BP_' . $i));
-            $BP_CURRENT_USER_LEVEL = $wallet->getWalletBalance($allAccounts[$BP_CURRENT_USER]->account_code,$wallet->getWalletID('BP_COUNTER'));
-
-            if ($BP_USERS_COUNT == $startEntry_count)
+            //CHECK PACKAGE
+            if ($allAccounts[$BP_CURRENT_USER]->account_package >= $package->getPackageID('PREMIUM'))
             {
-                //CHECK PACKAGE
-                if ($allAccounts[$BP_CURRENT_USER]->account_package >= $package->getPackageID('BASIC'))
+                if ($level < 22)
                 {
-                    // CHECK USER BP LEVEL
+                    $earning = $Pearnings[$i];
+                    $wallet->topUp($allAccounts[$BP_CURRENT_USER]->account_code,$earning,$wallet->getWalletID('BP'));
 
-                    if ($level < 23)
-                    {
-                        $earning = $Bearnings[$i];
-                        $wallet->topUp($allAccounts[$BP_CURRENT_USER]->account_code,$earning,$wallet->getWalletID('BP'));
-                        $this->executeBonusPool(($BP_CURRENT_USER_LEVEL + 1));
-
-                        $wallet->topUp("ADMIN", 1, $wallet->getWalletID('ADMIN_BP_' . $i));
-                        $wallet->topUp($allAccounts[$BP_CURRENT_USER]->account_code, 1, $wallet->getWalletID('BP_COUNTER'));
-                        $wallet->setBalance("ADMIN",'0',$wallet->getWalletID('ADMIN_BP_USER_COUNT_'. $i));
-                    }
-                }
-
-                //CHECK PACKAGE
-                if ($allAccounts[$BP_CURRENT_USER]->account_package >= $package->getPackageID('PREMIUM'))
-                {
-                    if ($level < 22)
-                    {
-                        $earning = $Pearnings[$i];
-                        $wallet->topUp($allAccounts[$BP_CURRENT_USER]->account_code,$earning,$wallet->getWalletID('BP'));
-
-                        $wallet->topUp($allAccounts[$BP_CURRENT_USER]->account_code, 1, $wallet->getWalletID('BP_COUNTER'));
-                        $wallet->topUp("ADMIN", 1, $wallet->getWalletID('ADMIN_BP_' . $i));
-                        $wallet->setBalance("ADMIN",'0',$wallet->getWalletID('ADMIN_BP_USER_COUNT_'. $i));
-
-                    }
-
-
+                    $wallet->topUp($allAccounts[$BP_CURRENT_USER]->account_code, 1, $wallet->getWalletID('BP_COUNTER'));
+                    $wallet->topUp("ADMIN", 1, $wallet->getWalletID('ADMIN_BP_' . $i));
+                    $wallet->setBalance("ADMIN",'0',$wallet->getWalletID('ADMIN_BP_USER_COUNT_'. $i));
 
                 }
 
 
 
             }
-            else{
-                // IF NOT, ADD USER TO COUNTER
-                $wallet->topUp("ADMIN", 1, $wallet->getWalletID('ADMIN_BP_USER_COUNT_'. $i));
 
-            }
+
+
+        }
+        else{
+            // IF NOT, ADD USER TO COUNTER
+            $wallet->topUp("ADMIN", 1, $wallet->getWalletID('ADMIN_BP_USER_COUNT_'. $i));
+
+        }
 
 
 
 
     }
 
-    function excecuteSHbonus(){
+    function excecuteSHbonus($options){
         global $controllers;
         global $_date;
         $wallet = new wallet;
         $package = new packages;
 
-        $allUsers = $this->getAllUsers();
+
+        $encodedUser = $this->findById($options);
+        $args = new stdClass;
+        $args->directs_count = 3;
+
+        $allUsers = $this->getUsersWithDirects($args);
         $length = count($allUsers) - 1;
         $x = 0;
         $tmpLog = '';
@@ -791,154 +825,13 @@ class accounts{
             $tmpLog = $tmpLog . ' EXECUTE SH BONUS - ' . $x;
 
             $tmpLog = $tmpLog . ' count ' . $this->userName;
+            $AccountPackageAmount = $package->getPackageAmount($encodedUser->account_package);
 
-            //return $tmpLog;
-
-            //CHECK FOR 5 DIRECTS
-            if ($this->directs->count >= 5)
+            // CHECK FOR 3 DIRECTS
+            if ($this->directs->count >= 3)
             {
-
-                //CHECK IF 8 DAYS HAS PASSED
-
-                if ($this->lastUpdate != "0000-00-00")
-                {
-                    $initlastUpdate = new DateTime($this->lastUpdate);
-                    $datediff  = new DateTime($_date);
-                    $getDays =  $initlastUpdate->diff($datediff);
-
-                    if ($getDays->days > 7)
-                    {
-                        //CHECK NUMBER OF DOWNLINES
-                        $DL_COUNT = $wallet->getWalletBalance($upline_account_code,$wallet->getWalletID('DL_COUNT'));
-
-                        if ($DL_COUNT <= 10)
-                        {
-                            //CHECK PACKAGE
-                            if ($this->account_package >= 1)
-                            {
-                                $AccountPackageAmount = $package->getPackageAmount($package->getPackageID('BASIC'));
-                                $wallet->topUp($upline_account_code,(floatval($AccountPackageAmount)*.03),$wallet->getWalletID('MAIN'));
-                                $wallet->topUp($upline_account_code,(floatval($AccountPackageAmount)*.03),$wallet->getWalletID('SH'));
-                                $tmpLog = $tmpLog . ' - SH AT 5%, PACKAGE @ ' . $AccountPackageAmount;
-                            }
-
-                        }
-
-                        else if ($DL_COUNT <= 25)
-                        {
-                            //CHECK PACKAGE
-                            if ($this->account_package >= 1)
-                            {
-                                $AccountPackageAmount = $package->getPackageAmount($package->getPackageID('BASIC'));
-                                $wallet->topUp($upline_account_code,(floatval($AccountPackageAmount)*.03),$wallet->getWalletID('MAIN'));
-                                $wallet->topUp($upline_account_code,(floatval($AccountPackageAmount)*.03),$wallet->getWalletID('SH'));
-                                $tmpLog = $tmpLog . ' - SH AT 3%, PACKAGE @ ' . $AccountPackageAmount;
-                            }
-                        }
-
-                        else if ($DL_COUNT <= 125)
-                        {
-                            //CHECK PACKAGE
-                            if ($this->account_package >= 1)
-                            {
-                                $AccountPackageAmount = $package->getPackageAmount($package->getPackageID('BASIC'));
-                                $wallet->topUp($upline_account_code,(floatval($AccountPackageAmount)*.03),$wallet->getWalletID('MAIN'));
-                                $wallet->topUp($upline_account_code,(floatval($AccountPackageAmount)*.03),$wallet->getWalletID('SH'));
-                                $tmpLog = $tmpLog . ' - SH AT 3%, PACKAGE @ ' . $AccountPackageAmount;
-                            }
-                        }
-
-                        else if ($DL_COUNT <= 625)
-                        {
-                            //CHECK PACKAGE
-                            if ($this->account_package >= 2 and $this->checkDirectsPackages($upline_account_code) == true)
-                            {
-                                $AccountPackageAmount = $package->getPackageAmount($package->getPackageID('BASIC'));
-                                $wallet->topUp($upline_account_code,(floatval($AccountPackageAmount)*.02),$wallet->getWalletID('MAIN'));
-                                $wallet->topUp($upline_account_code,(floatval($AccountPackageAmount)*.02),$wallet->getWalletID('SH'));
-                            }
-                        }
-
-                        else if ($DL_COUNT <= 3125)
-                        {
-                            //CHECK PACKAGE
-                            if ($this->account_package >= 3 and $this->checkDirectsPackages($upline_account_code) == true)
-                            {
-                                $AccountPackageAmount = $package->getPackageAmount($package->getPackageID('BASIC'));
-                                $wallet->topUp($upline_account_code,(floatval($AccountPackageAmount)*.01),$wallet->getWalletID('MAIN'));
-                                $wallet->topUp($upline_account_code,(floatval($AccountPackageAmount)*.01),$wallet->getWalletID('SH'));
-                            }
-                        }
-
-                        //else if ($DL_COUNT <= 15625)
-                        //{
-                        //    //CHECK PACKAGE
-                        //    if ($this->account_package == 3)
-                        //    {
-                        //        $AccountPackageAmount = $package->getPackageAmount($package->getPackageID('BASIC'));
-                        //        $wallet->topUp($upline_account_code,(floatval($AccountPackageAmount)*.03),$wallet->getWalletID('MAIN'));
-                        //        $wallet->topUp($upline_account_code,(floatval($AccountPackageAmount)*.03),$wallet->getWalletID('SH'));
-                        //    }
-                        //}
-
-                        //else if ($DL_COUNT <= 78125)
-                        //{
-                        //    //CHECK PACKAGE
-                        //    if ($this->account_package == 3)
-                        //    {
-                        //        $AccountPackageAmount = $package->getPackageAmount($package->getPackageID('BASIC'));
-                        //        $wallet->topUp($upline_account_code,(floatval($AccountPackageAmount)*.03),$wallet->getWalletID('MAIN'));
-                        //        $wallet->topUp($upline_account_code,(floatval($AccountPackageAmount)*.03),$wallet->getWalletID('SH'));
-                        //    }
-                        //}
-
-                        //else if ($DL_COUNT <= 390625)
-                        //{
-                        //    //CHECK PACKAGE
-                        //    if ($this->account_package == 4)
-                        //    {
-                        //        $AccountPackageAmount = $package->getPackageAmount($package->getPackageID('BASIC'));
-                        //        $wallet->topUp($upline_account_code,(floatval($AccountPackageAmount)*.03),$wallet->getWalletID('MAIN'));
-                        //        $wallet->topUp($upline_account_code,(floatval($AccountPackageAmount)*.03),$wallet->getWalletID('SH'));
-                        //    }
-                        //}
-
-                        //else if ($DL_COUNT <= 1953125)
-                        //{
-                        //    //CHECK PACKAGE
-                        //    if ($this->account_package == 4)
-                        //    {
-                        //        $AccountPackageAmount = $package->getPackageAmount($package->getPackageID('BASIC'));
-                        //        $wallet->topUp($upline_account_code,(floatval($AccountPackageAmount)*.04),$wallet->getWalletID('MAIN'));
-                        //        $wallet->topUp($upline_account_code,(floatval($AccountPackageAmount)*.04),$wallet->getWalletID('SH'));
-                        //    }
-                        //}
-
-                        //else if ($DL_COUNT <= 9765625)
-                        //{
-                        //    //CHECK PACKAGE
-                        //    if ($this->account_package == 4)
-                        //    {
-                        //        $AccountPackageAmount = $package->getPackageAmount($package->getPackageID('BASIC'));
-                        //        $wallet->topUp($upline_account_code,(floatval($AccountPackageAmount)*.04),$wallet->getWalletID('MAIN'));
-                        //        $wallet->topUp($upline_account_code,(floatval($AccountPackageAmount)*.04),$wallet->getWalletID('SH'));
-                        //    }
-                        //}
-
-
-                    }
-
-
-                }
-
-                else{
-                    $this->updateShDalay();
-                }
-
-
-
-
-
+                $wallet->topUp($upline_account_code,((floatval($AccountPackageAmount)*0.1) / count($allUsers)),$wallet->getWalletID('SH'),true);
+                $tmpLog = $tmpLog . ' - SH AT 10%, PACKAGE @ ' . $AccountPackageAmount;
 
             }
             else{

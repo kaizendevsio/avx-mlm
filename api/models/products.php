@@ -182,21 +182,24 @@ class products{
     }
 
     function checkRequirements($args){
-        global $_datetime;
-        $wallet = new wallet;
+       
+        return true;
+        
+        //global $_datetime;
+        //$wallet = new wallet;
 
-        $product_items = floatval($wallet->getWalletBalance($args->userID,$wallet->getWalletID('PRD_ITMS_TLT')));
-        $product_last_bought_date = $wallet->getWalletBalanceLastModified($args->userID,$wallet->getWalletID('PRD_ITMS_TLT'));
-        $product_last_bought_date = date('m',strtotime($product_last_bought_date));
-        $dateNow = date('m',strtotime($_datetime));
+        //$product_items = floatval($wallet->getWalletBalance($args->userID,$wallet->getWalletID('PRD_ITMS_TLT')));
+        //$product_last_bought_date = $wallet->getWalletBalanceLastModified($args->userID,$wallet->getWalletID('PRD_ITMS_TLT'));
+        //$product_last_bought_date = date('m',strtotime($product_last_bought_date));
+        //$dateNow = date('m',strtotime($_datetime));
 
-        if ($product_items >= 2 and $product_last_bought_date == $dateNow)
-        {
-            return true;
-        }
-        else{
-            return false;
-        }
+        //if ($product_items >= 2 and $product_last_bought_date == $dateNow)
+        //{
+        //    return true;
+        //}
+        //else{
+        //    return false;
+        //}
 
 
     }

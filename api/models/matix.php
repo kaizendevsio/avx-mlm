@@ -175,8 +175,7 @@ class matrix{
         if ($node->binaryCount_left > 0 or $node->binaryCount_right > 0)
         {
             // ADD TO PAIR COUNTER
-            $wallet->topUp($options->account_code,($user_pair),$wallet->getWalletID('PRB'),true);
-            $wallet->topUp($options->account_code,1,$wallet->getWalletID('PR_COUNTER'),true);
+            $wallet->topUp($options->account_code,1,$wallet->getWalletID('PR_COUNTER'));
 
             // ASSES WHICH LEG TO CALCULATE
             if ($node->binaryCount_left > $node->binaryCount_right)
@@ -189,15 +188,19 @@ class matrix{
                 $current_Node->binaryCount_left = $binaryCount_left;
                 $current_Node->binaryCount_right = 0;
 
-                if ($options->account_package == $package->getPackageID('SILVER'))
-                {
-                	$user_pair = 500 * floatval($node->binaryCount_right);
-                }
-                else if ($options->account_package == $package->getPackageID('GOLD'))
-                {
-                	$user_pair = 1000 * floatval($node->binaryCount_right);
-                }
+                $package->getPackageName($options->account_package);
+                $user_pair = (floatval($package->value) * 0.10) * (floatval($node->binaryCount_right) / 150);
 
+                //if ($options->account_package == $package->getPackageID('SILVER'))
+                //{
+                //    $user_pair = 500 * floatval($node->binaryCount_right);
+                //}
+                //else if ($options->account_package == $package->getPackageID('GOLD'))
+                //{
+                //    $user_pair = 1000 * floatval($node->binaryCount_right);
+                //}
+
+                $wallet->topUp($options->account_code,($user_pair),$wallet->getWalletID('PRB'),true);
                 $this->NodeSetBalance($current_Node);
                 return true;
             }
@@ -210,15 +213,19 @@ class matrix{
                 $current_Node->binaryCount_right = $binaryCount_right;
                 $current_Node->binaryCount_left = 0;
 
-                if ($options->account_package == $package->getPackageID('SILVER'))
-                {
-                	$user_pair = 500 * floatval($node->binaryCount_left);
-                }
-                else if ($options->account_package == $package->getPackageID('GOLD'))
-                {
-                	$user_pair = 1000 * floatval($node->binaryCount_left);
-                }
+                $package->getPackageName($options->account_package);
+                $user_pair = (floatval($package->value) * 0.10) * (floatval($node->binaryCount_left) / 150);
 
+                //if ($options->account_package == $package->getPackageID('SILVER'))
+                //{
+                //    $user_pair = 500 * floatval($node->binaryCount_left);
+                //}
+                //else if ($options->account_package == $package->getPackageID('GOLD'))
+                //{
+                //    $user_pair = 1000 * floatval($node->binaryCount_left);
+                //}
+
+                $wallet->topUp($options->account_code,($user_pair),$wallet->getWalletID('PRB'),true);
                 $this->NodeSetBalance($current_Node);
                 return true;
             } else if($node->binaryCount_left == $node->binaryCount_right) {
@@ -229,15 +236,19 @@ class matrix{
                 $current_Node->binaryPosition = '2';
                 $current_Node->binaryCount_right = $binaryCount_right;
 
-                if ($options->account_package == $package->getPackageID('SILVER'))
-                {
-                	$user_pair = 500 * floatval($node->binaryCount_left);
-                }
-                else if ($options->account_package == $package->getPackageID('GOLD'))
-                {
-                	$user_pair = 1000 * floatval($node->binaryCount_left);
-                }
+                $package->getPackageName($options->account_package);
+                $user_pair = (floatval($package->value) * 0.10) * (floatval($node->binaryCount_left) / 150);
 
+                //if ($options->account_package == $package->getPackageID('SILVER'))
+                //{
+                //    $user_pair = 500 * floatval($node->binaryCount_left);
+                //}
+                //else if ($options->account_package == $package->getPackageID('GOLD'))
+                //{
+                //    $user_pair = 1000 * floatval($node->binaryCount_left);
+                //}
+
+                $wallet->topUp($options->account_code,($user_pair),$wallet->getWalletID('PRB'),true);
                 $this->NodeSetBalance($current_Node);
 
                 $current_Node->account_code = $node->account_code;
@@ -287,6 +298,9 @@ class matrix{
         {
             if ($node->binaryCount_left > $node->binaryCount_right or $node->binaryCount_left < $node->binaryCount_right or $node->binaryCount_left == $node->binaryCount_right)
             {
+                // OVERRIDE FLUSH OUT SETTING, THROW TRUE
+                return true;
+
                 // CHECK FOR FLUSHOUTS
                 if ($wallet->balance > $flushOutCount)
                 {
